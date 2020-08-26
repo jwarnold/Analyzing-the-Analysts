@@ -22,5 +22,7 @@ Please provide credit where credit is due:
   john.jw.arnold@gmail.com
   
   https://www.linkedin.com/in/john-arnold-99aab0189/
+  
+I am very open to criticism or pointers to my coding and style
 
 Shameless plug: If you liked it or found it useful, consider interviewing me for a job! I am based in Toronto.
