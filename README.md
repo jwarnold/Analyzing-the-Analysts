@@ -1,7 +1,7 @@
 # Analyzing-the-Analysts
 Analyzing the Price Targets set by brokerages against actual stock performance. An exploratory analysis to pull ratings data, historical stock performance and generate a time series graph to visualize how well the banks are at predicitng stock prices.
 
-Writting in Python 3, requirements from the user:
+Written in Python 3, the following are the requirements from the user:
   1) Set your working directory for where you want the graph to be saved
   2) In the second cell, input the company you want to see - by it's ticker
   3) Input which exchange it is traded on. 
