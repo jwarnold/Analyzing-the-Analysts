@@ -13,6 +13,7 @@ Written in Python 3, I've only tested it for U.S. exchanges (NYSE, NASDAQ) the f
   5) Run my script, the graph will be saved where you set your working directory. 
   
 Please provide credit where credit is due:
+
   john.jw.arnold@gmail.com
   
   https://www.linkedin.com/in/john-arnold-99aab0189/
