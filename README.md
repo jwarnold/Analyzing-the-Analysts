@@ -13,9 +13,12 @@ Written in Python 3, I've only tested it for U.S. exchanges (NYSE, NASDAQ) the f
     d) re (regex) 
     
   2) Set your working directory for where you want the graph to be saved
-  3) In the second cell, input the company you want to see - by it's ticker e.g. "MSFT", "GE", "NIO"
-  4) Input which exchange it is traded on. e.g. for MSFT, it's traded on the "NASDAQ", GE is traded on the "NYSE"
-  5) Run my script, the graph will be saved where you set your working directory. 
+  3) Go to lines 31 - 50
+  4) Input the company you want to see - by it's ticker e.g. "MSFT", "GE", "NIO"
+  5) Input which exchange it is traded on. e.g. for MSFT, it's traded on the "NASDAQ", GE is traded on the "NYSE"
+  6) Change your start and enddates accordingly
+  7a) Run my script, the graph will be saved where you set your working directory. 
+  7b) If you want to see different brokerages / investment banks, find the "broke_list" variable to get you a list of ratings provided, change them in the bank list variable on         line 42
   
 Please provide credit where credit is due:
 
