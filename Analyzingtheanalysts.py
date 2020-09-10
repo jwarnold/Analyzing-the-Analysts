@@ -21,10 +21,12 @@ import csv
 from pandas_datareader import data as pda
 import datetime
 
-#Seaborn
-import matplotlib.pyplot as plt
-import seaborn as sns
-
+#Bokeh
+#pip install pandas bokeh pyproj
+from bokeh.plotting import figure, output_file, show
+from bokeh.models import ColumnDataSource
+from bokeh.models.tools import HoverTool
+from bokeh.palettes import Spectral8
 
 
 
@@ -33,8 +35,8 @@ import seaborn as sns
 
 #Set your ticker and exchange e.g. "GE" and "NYSE" or "MSFT" and "NASDAQ"
 
-ticker="MSFT"
-exchange="NASDAQ"
+ticker="GE"
+exchange="NYSE"
 
 #Run this script, check the "broke_list" variable for a list of the investment banks, change the banklist
 #list variable according to which ones you want
@@ -46,126 +48,10 @@ banklist = ["Deutsche Bank", "Bank of America", "JPMorgan Chase", "Citigroup",\
 #Pull the ratings first if you want an idea of how far back to go. 
 
 startdate = datetime.datetime(2017, 3, 1) 
-enddate = datetime.datetime(2020, 8, 10)
+enddate = datetime.datetime(2020, 9, 10)
 
 
 
-
-#%%%
-"""Getting a list of the highest traded tickers in the last 3 months - mostly exploratory to see the most traded stocks
-    Not a component of the graphs. Skip to the next cell for the data pull and graphing code"""
-
-#Pull list of most actively traded stocks based on 3 month averages from yahoo finance
-#https://ca.finance.yahoo.com/screener/predefined/most_actives?count=100&offset=0
-
-r1 = requests.get("https://ca.finance.yahoo.com/screener/predefined/most_actives?count=100&offset=0", headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'})
-r2 = requests.get("https://ca.finance.yahoo.com/screener/predefined/most_actives?count=100&offset=100", headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'})
-print(r1.status_code)
-print(r2.status_code)
-c1 = r1.content
-c2 = r2.content
-
-#Parse the pulls
-soup1 = BeautifulSoup(c1, "html.parser")
-soup2 = BeautifulSoup(c2, "html.parser")
-
-#Designate tables inside the html
-tabledes = soup1.find("tbody")
-#ticker = tabledes.find("a").contents
-avgvol = tabledes.find("td", attrs = {"aria-label":"Avg Vol (3 month)"}).contents
-mktcap = tabledes.find("td", attrs = {"aria-label":"Market Cap"}).contents
-
-tabledes2 = soup2.find("tbody")
-
-#Check their format
-#print(ticker[0])
-# print(avgvol[1])
-# print(mktcap)
-
-#Pull out the tickers, Avg. Volumes (3 Months) and mkt cap from the table designation
-tickerlist1 = []
-tickerlist2 = []
-
-for tickers in tabledes.find_all("a"):
-    tickerlist1.append(tickers.get_text())
-    
-for tickers in tabledes2.find_all("a"):
-    tickerlist2.append(tickers.get_text())
-
-tickerlist = tickerlist1 + tickerlist2
-
-
-    
-vollist1 = []
-vollist2 = []
-
-for vol in tabledes.find_all("td", attrs = {"aria-label":"Avg Vol (3 month)"}):
-    vollist1.append(vol.get_text())
-    
-for vol in tabledes2.find_all("td", attrs = {"aria-label":"Avg Vol (3 month)"}):
-    vollist2.append(vol.get_text())
-
-vollist = vollist1 + vollist2
-
-mktcaplist1 = []
-mktcaplist2 = []
-
-for mktcap in tabledes.find_all("td", attrs = {"aria-label":"Market Cap"}):
-    mktcaplist1.append(mktcap.get_text())
-    
-for mktcap in tabledes2.find_all("td", attrs = {"aria-label":"Market Cap"}):
-    mktcaplist2.append(mktcap.get_text())
-    
-mktcaplist = mktcaplist1 + mktcaplist2
-
-#Clean up the lists (change to floats)
-
-floatvol = []
-
-for vol in vollist:
-    if vol[-1]=="M":
-        vol = vol[0:-1]
-        vol=float(vol)
-        vol = vol*1000000
-        floatvol.append(float(vol))
-    else:
-        vol=vol.replace(",","")
-        vol=float(vol)
-        floatvol.append(float(vol))
-print(floatvol)
-
-floatcap=[]
-
-for cap in mktcaplist:
-    if cap[-1]=="T":
-        cap = cap[0:-1]
-        cap = float(cap)
-        cap = cap*1000000000000
-        floatcap.append(float(cap))
-    elif cap[-1]=="B":
-        cap = cap[0:-1]
-        cap = float(cap)
-        cap = cap*1000000000
-        floatcap.append(float(cap))
-    elif cap[-1]=="M":
-        cap = cap[0:-1]
-        cap = float(cap)
-        cap = cap * 1000000
-        floatcap.append(float(cap))
-        
-#Turn into a dataframe
-        
-df_ya = pd.DataFrame([tickerlist, floatvol, floatcap])
-
-# with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-#     print(df_ya)
-    
-#Clean up the dataframes
-    
-df1_ya = df_ya.T
-df1_ya.columns = ["Ticker","Avg_Vol(M)","mktcap(B)"]
-
-df1_ya.sort_values(by="Avg_Vol(M)",ascending = False)
 
 #%%
 
@@ -331,36 +217,39 @@ max_x = max(df_ra["date"])
 
 
 #%%
-
-#Lost the smaller banks in df_ra, using df_ra_red for data in the relplot
-
-broke_list = df_ra.brokerage.unique()
 df_ra_red = df_ra[df_ra["brokerage"].isin(banklist)]
 
-
-#Graphs
-sns.set(style = "darkgrid")
-
-fig1a = sns.relplot(x = "date", y = "pt", data = df_ra_red, \
-                    hue = "brokerage", kind = "line",  )
+p = figure(plot_width=800, plot_height=250, x_axis_type="datetime")
     
-fig1a._legend.remove()
-fig2a = sns.regplot(x = 'Date', y = 'Close', data = df_his, \
-                     fit_reg = False, marker = ".", scatter_kws = {'s':2})
+#For Bokeh need to create seperate dataframes for each of the banks
+db = df_ra_red[df_ra_red.brokerage == 'Deutsche Bank']
+bac = df_ra_red[df_ra_red.brokerage == 'Bank of America']
+jpm = df_ra_red[df_ra_red.brokerage == 'JPMorgan Chase']
+cg = df_ra_red[df_ra_red.brokerage == 'Citigroup']
+ms = df_ra_red[df_ra_red.brokerage == 'Morgan Stanley']
+barc = df_ra_red[df_ra_red.brokerage == 'Barclays']
+gs = df_ra_red[df_ra_red.brokerage == 'Goldman Sachs Group']
+
+TOOLS = 'crosshair,save,pan,box_zoom,reset,wheel_zoom'
+p = figure(title="{} Bank Price Targets vs. Actual Closing Price".format(ticker), y_axis_type="linear",x_axis_type='datetime', tools = TOOLS,plot_width=1400, plot_height=600)
+
+p.line(df_his["Date"], df_his["Close"], legend = "Closing Price", line_color = "green", line_width = 3)
+p.step(db['date'], db.pt, legend="DB", line_color= Spectral8[0], line_width = 3)
+p.step(bac['date'], bac.pt, legend="BAC", line_color=Spectral8[1], line_width = 3)
+p.step(jpm['date'], jpm.pt, legend="JPM",line_dash="dotted",line_color="black", line_width = 4)
+p.step(cg['date'], cg.pt, legend="Citigroup", line_color="#f46d43", line_width = 3)
+p.step(ms['date'], bac.pt, legend="Morgan Stanley", line_color="black", line_width = 3)
+p.step(barc['date'], bac.pt, legend="Barclays", line_color=Spectral8[5], line_width = 3)
+p.step(gs['date'], bac.pt, legend="Goldman Sachs",line_dash="dashed", line_color=Spectral8[6], line_width = 3)
+
+p.legend.location = "bottom_left"
+p.legend.click_policy="hide"
+
+p.xaxis.axis_label = 'Date'
+p.yaxis.axis_label = 'pt'
 
 
+show(p)
 
-#Make x axis date friendly
-fig1a.fig.autofmt_xdate()
-
-#Change the title and axes labels
-fig1a.set(xlabel = "Date", ylabel = "Closing Price / Price Target")
-fig1a.set(title = ticker)
-
-#PLace legend outside of figure
-plt.legend(bbox_to_anchor = (1.05, 1), loc=2, borderaxespad = 0.)
-
-plt.grid(True)
-
-plt.savefig('MSFT_600dpi.pdf', dpi =600)
+output_file("{} PTs vs Close Bokeh.html".format(ticker), title="Bokeh Pt plots")
 
