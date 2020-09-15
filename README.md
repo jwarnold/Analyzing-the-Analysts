@@ -17,10 +17,8 @@ Written in Python 3, I've only tested it for U.S. exchanges (NYSE, NASDAQ) the f
   4) Input the company you want to see - by it's ticker e.g. "MSFT", "GE", "NIO"
   5) Input which exchange it is traded on. e.g. for MSFT, it's traded on the "NASDAQ", GE is traded on the "NYSE"
   6) Change your start and enddates accordingly
-  
-  7a) Run my script, the graph will be saved where you set your working directory 
-  
-  7b) If you want to see different brokerages / investment banks, find the "broke_list" variable to get you a list of ratings provided, change them in the bank list variable on         line 42
+  7) Run my script, the graph will be saved where you set your working directory 
+  8) If you want to see different brokerages / investment banks, find the "broke_list" variable to get you a list of ratings provided, change them in the bank list variable on         line 44
   
 Please provide credit where credit is due:
 
